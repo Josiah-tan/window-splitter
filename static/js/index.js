@@ -30,6 +30,14 @@ class WindowLeaf extends _Window {
 		this._relative_x = 1;
 		this._relative_y = 1;
 	}
+	setActive(){
+		this.div.classList.remove(this.state);
+		this.div.classList.add('active');
+	}
+	setInactive(){
+		this.div.classList.remove(this.state);
+		this.div.classList.add('inactive');
+	}
 }
 
 class TilingManager {
@@ -178,9 +186,9 @@ class TilingManager {
 		console.log("something's gone very wrong");
 	}
 	setActiveWindow(new_window){
+		this.active_window.setInactive();
 		this.active_window = new_window;
-		new_window.div.classList.remove(new_window.state);
-		new_window.div.classList.add('active');
+		this.active_window.setActive();
 	}
 	closeActive(){
 		if (this.active_window.parent != null){
