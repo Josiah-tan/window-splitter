@@ -177,7 +177,7 @@ var tiling_manager = new TilingManager(document.body)
 document.addEventListener('keydown', function(event) {
 	if (event.key === 'v') {
 		tiling_manager.verticalSplit()
-	} else if (event.key === 'h') {
+	} else if (event.key === 's') {
 		tiling_manager.horizontalSplit()
 	}
 	console.log(tiling_manager);
