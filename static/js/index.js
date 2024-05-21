@@ -2,7 +2,6 @@ class _Window {
 	static instanceCount = 0;
 	constructor(parent = null){
 		this.id = _Window.instanceCount;
-		console.log(`this.id = ${this.id}`)
 		_Window.instanceCount++;
 		this.parent = parent;
 	}
@@ -14,7 +13,6 @@ class _Window {
 class WindowStem extends _Window {
 	constructor(north = null, south = null, west = null, east = null, parent = null){
 		super(parent);
-		console.log(this.id)
 		this.north = north;
 		this.south = south;
 		this.west = west;
@@ -36,11 +34,11 @@ class WindowLeaf extends _Window {
 
 class TilingManager {
 	constructor(div = document.body){
-		this.windows = [];
-		this.current_window = new WindowLeaf('active');
-		this.root = this.current_window;
+		this.windows = new Set();
+		this.active_window = new WindowLeaf('active');
+		this.root = this.active_window;
 		this.div = div;
-		this.addWindowLeaf(this.current_window);
+		this.addWindowLeaf(this.active_window);
 		this.displayAll();
 	}
 
@@ -105,8 +103,13 @@ class TilingManager {
 	}
 
 	addWindowLeaf(new_window){
-		this.windows.push(new_window);
+		this.windows.add(new_window);
 		this.div.appendChild(new_window.div);
+	}
+
+	removeWindowLeaf(old_window){
+		this.windows.delete(old_window);
+		this.div.removeChild(old_window.div);
 	}
 
 	siftUpRootIfNecessary(){
@@ -114,28 +117,28 @@ class TilingManager {
 			this.root = this.root.parent;
 		}
 	}
-	resetGrandparent(grandparent, old_window, new_window){
-		if (grandparent == null){
+	replaceParentKid(parent, old_kid, new_kid){
+		if (parent == null){
 			return;
 		}
-		if (grandparent.west == old_window){
-			grandparent.west = new_window;
+		if (parent.west == old_kid){
+			parent.west = new_kid;
 		}
-		else if (grandparent.east == old_window){
-			grandparent.east = new_window;
+		else if (parent.east == old_kid){
+			parent.east = new_kid;
 		}
-		else if (grandparent.north == old_window){
-			grandparent.north = new_window;
+		else if (parent.north == old_kid){
+			parent.north = new_kid;
 		}
-		else if (grandparent.south == old_window){
-			grandparent.south = new_window;
+		else if (parent.south == old_kid){
+			parent.south = new_kid;
 		}
 	}
-	verticalSplit(){
-		let west = this.current_window;
+	verticalSplitActive(){
+		let west = this.active_window;
 		let east = new WindowLeaf('inactive');
 		let parent = new WindowStem();
-		this.resetGrandparent(west.parent, west, parent);
+		this.replaceParentKid(west.parent, west, parent);
 
 		parent.parent = west.parent;
 		parent.west = west;
@@ -148,11 +151,11 @@ class TilingManager {
 		this.siftUpRootIfNecessary();
 		this.displayAll();
 	}
-	horizontalSplit(){
-		let north = this.current_window;
+	horizontalSplitActive(){
+		let north = this.active_window;
 		let south = new WindowLeaf('inactive');
 		let parent = new WindowStem();
-		this.resetGrandparent(north.parent, north, parent);
+		this.replaceParentKid(north.parent, north, parent);
 
 		parent.parent = north.parent;
 		parent.north = north;
@@ -164,6 +167,34 @@ class TilingManager {
 
 		this.siftUpRootIfNecessary();
 		this.displayAll();
+	}
+	getSibling(current_window){
+		parent = current_window.parent;
+		for (let kid of [parent.east, parent.west, parent.south, parent.north]){
+			if (kid != null && kid != current_window){
+				return kid;
+			}
+		}
+		console.log("something's gone very wrong");
+	}
+	setActiveWindow(new_window){
+		this.active_window = new_window;
+		new_window.div.classList.remove(new_window.state);
+		new_window.div.classList.add('active');
+	}
+	closeActive(){
+		if (this.active_window.parent != null){
+			let current_window = this.active_window;
+			let sibling = this.getSibling(current_window);
+			this.replaceParentKid(current_window.parent.parent, current_window.parent, sibling);
+			this.removeWindowLeaf(this.active_window);
+			this.setActiveWindow(sibling);
+			sibling.parent = current_window.parent.parent;
+			this.updateAncestors(sibling.parent);
+			this.root = sibling;
+			this.siftUpRootIfNecessary();
+			this.displayAll();
+		}
 	}
 	updateAncestors(parent){
 		while (parent != null){
@@ -187,11 +218,13 @@ var tiling_manager = new TilingManager(document.body)
 
 document.addEventListener('keydown', function(event) {
 	if (event.key === 'v') {
-		tiling_manager.verticalSplit()
+		tiling_manager.verticalSplitActive();
 	} else if (event.key === 's') {
-		tiling_manager.horizontalSplit()
+		tiling_manager.horizontalSplitActive();
+	} else if (event.key === 'q') {
+		tiling_manager.closeActive();
 	}
-	console.log( tiling_manager)
+	console.log(tiling_manager)
 });
 
 function asPixel(value){
