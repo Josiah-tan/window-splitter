@@ -180,55 +180,8 @@ document.addEventListener('keydown', function(event) {
 	} else if (event.key === 's') {
 		tiling_manager.horizontalSplit()
 	}
-	console.log(tiling_manager);
-	// for (win in tiling_manager.windows){
-	// 	console.log($`{win.}`)
-	// }
-
-
 });
-
-// export {tiling_manager};
 
 function asPixel(value){
 	return value + 'px';
 }
-
-function extractDimensions(windowElement){
-	const windowStyle = getComputedStyle(windowElement);
-	const left = parseFloat(windowStyle.left);
-	const width = parseFloat(windowStyle.width);
-	const top = parseFloat(windowStyle.top);
-	const height = parseFloat(windowStyle.height);
-	return [left, width, top, height];
-}
-
-function splitVertically(windowElement) {
-	const [left, width, top, height] = extractDimensions(windowElement);
-
-	let newWindow = document.createElement('div');
-	newWindow.className = 'window inactive';
-	newWindow.style.width = asPixel(width / 2);
-	newWindow.style.top = asPixel(top);
-	newWindow.style.height = asPixel(height);
-	newWindow.style.left = asPixel(left + width / 2);
-	document.body.appendChild(newWindow);
-
-	windowElement.style.width = asPixel(width / 2);
-}
-
-function splitHorizontally(windowElement) {
-	const [left, width, top, height] = extractDimensions(windowElement);
-
-	let newWindow = document.createElement('div');
-	newWindow.className = 'window inactive';
-	newWindow.style.top = asPixel(top + height / 2);
-	newWindow.style.height = asPixel(height / 2);
-	newWindow.style.left = asPixel(left);
-	newWindow.style.width = asPixel(width);
-	document.body.appendChild(newWindow);
-
-	windowElement.style.height = asPixel(height / 2);
-}
-
-
