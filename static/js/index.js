@@ -1,31 +1,43 @@
-class Window {
+class _Window {
 	static instanceCount = 0;
-	constructor(state = 'active', parent = null, north = null, south = null, west = null, east = null){
-		this.id = Window.instanceCount;
-		Window.instanceCount++;
-		
-		this.state = state;
+	constructor(parent = null){
+		this.id = _Window.instanceCount;
+		console.log(`this.id = ${this.id}`)
+		_Window.instanceCount++;
 		this.parent = parent;
+	}
+	isLeaf(){
+		return this instanceof WindowLeaf;
+	}
+}
+
+class WindowStem extends _Window {
+	constructor(north = null, south = null, west = null, east = null, parent = null){
+		super(parent);
+		console.log(this.id)
 		this.north = north;
 		this.south = south;
 		this.west = west;
 		this.east = east;
+	}
+}
+
+class WindowLeaf extends _Window {
+	constructor(state = 'active', parent = null){
+		super(parent);
+		this.state = state;
 		this.div = document.createElement('div');
 		this.div.classList.add('window');
 		this.div.classList.add(state);
-
 		this._relative_x = 1;
 		this._relative_y = 1;
-	}
-	isLeaf(){
-		return this.north == null && this.south == null && this.west == null && this.east == null;
 	}
 }
 
 class TilingManager {
 	constructor(div = document.body){
 		this.windows = [];
-		this.current_window = new Window('active');
+		this.current_window = new WindowLeaf('active');
 		this.root = this.current_window;
 		this.div = div;
 		this.addWindow(this.current_window);
@@ -121,40 +133,39 @@ class TilingManager {
 	}
 	verticalSplit(){
 		let west = this.current_window;
-		let east = new Window('inactive');
-		let parent = new Window('inactive');
+		let east = new WindowLeaf('inactive');
+		let parent = new WindowStem();
 		this.resetGrandparent(west.parent, west, parent);
 
 		parent.parent = west.parent;
 		parent.west = west;
 		parent.east = east;
 		this.addWindow(east);
-		this.addWindow(parent);
 		east.parent = parent;
 		west.parent = parent;
-		this.updateParent(parent);
+		this.updateAncestors(parent);
 
 		this.siftUpRootIfNecessary();
 		this.displayAll();
 	}
 	horizontalSplit(){
 		let north = this.current_window;
-		let south = new Window('inactive');
-		let parent = new Window('inactive');
+		let south = new WindowLeaf('inactive');
+		let parent = new WindowStem();
 		this.resetGrandparent(north.parent, north, parent);
+
 		parent.parent = north.parent;
 		parent.north = north;
 		parent.south = south;
 		this.addWindow(south);
-		this.addWindow(parent);
 		north.parent = parent;
 		south.parent = parent;
-		this.updateParent(parent);
+		this.updateAncestors(parent);
 
 		this.siftUpRootIfNecessary();
 		this.displayAll();
 	}
-	updateParent(parent){
+	updateAncestors(parent){
 		while (parent != null){
 			if (parent.east != null && parent.west != null){
 				parent._relative_x = parent.east._relative_x + parent.west._relative_x;
@@ -180,6 +191,7 @@ document.addEventListener('keydown', function(event) {
 	} else if (event.key === 's') {
 		tiling_manager.horizontalSplit()
 	}
+	console.log( tiling_manager)
 });
 
 function asPixel(value){
