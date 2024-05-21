@@ -40,7 +40,7 @@ class TilingManager {
 		this.current_window = new WindowLeaf('active');
 		this.root = this.current_window;
 		this.div = div;
-		this.addWindow(this.current_window);
+		this.addWindowLeaf(this.current_window);
 		this.displayAll();
 	}
 
@@ -104,7 +104,7 @@ class TilingManager {
 		}
 	}
 
-	addWindow(new_window){
+	addWindowLeaf(new_window){
 		this.windows.push(new_window);
 		this.div.appendChild(new_window.div);
 	}
@@ -140,7 +140,7 @@ class TilingManager {
 		parent.parent = west.parent;
 		parent.west = west;
 		parent.east = east;
-		this.addWindow(east);
+		this.addWindowLeaf(east);
 		east.parent = parent;
 		west.parent = parent;
 		this.updateAncestors(parent);
@@ -157,7 +157,7 @@ class TilingManager {
 		parent.parent = north.parent;
 		parent.north = north;
 		parent.south = south;
-		this.addWindow(south);
+		this.addWindowLeaf(south);
 		north.parent = parent;
 		south.parent = parent;
 		this.updateAncestors(parent);
