@@ -115,7 +115,7 @@ class TilingManager {
 		this.div.appendChild(new_window.div);
 	}
 
-	removeWindowLeaf(old_window){
+	removeWindowLeafFromDiv(old_window){
 		this.windows.delete(old_window);
 		this.div.removeChild(old_window.div);
 	}
@@ -195,7 +195,7 @@ class TilingManager {
 			let current_window = this.active_window;
 			let sibling = this.getSibling(current_window);
 			this.replaceParentKid(current_window.parent.parent, current_window.parent, sibling);
-			this.removeWindowLeaf(this.active_window);
+			this.removeWindowLeafFromDiv(this.active_window);
 			this.setActiveWindow(sibling);
 			sibling.parent = current_window.parent.parent;
 			this.updateAncestors(sibling.parent);
