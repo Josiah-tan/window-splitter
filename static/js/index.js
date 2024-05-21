@@ -1,11 +1,11 @@
 class Window {
 	static instanceCount = 0;
-	constructor(state = 'active', parent_window = null, north = null, south = null, west = null, east = null){
+	constructor(state = 'active', parent = null, north = null, south = null, west = null, east = null){
 		this.id = Window.instanceCount;
 		Window.instanceCount++;
 		
 		this.state = state;
-		this.parent_window = parent_window;
+		this.parent = parent;
 		this.north = north;
 		this.south = south;
 		this.west = west;
@@ -98,8 +98,8 @@ class TilingManager {
 	}
 
 	siftUpRootIfNecessary(){
-		while (this.root.parent_window != null){
-			this.root = this.root.parent_window;
+		while (this.root.parent != null){
+			this.root = this.root.parent;
 		}
 	}
 	resetGrandparent(grandparent, old_window, new_window){
@@ -122,17 +122,17 @@ class TilingManager {
 	verticalSplit(){
 		let west = this.current_window;
 		let east = new Window('inactive');
-		let parent_window = new Window('inactive');
-		this.resetGrandparent(west.parent_window, west, parent_window);
+		let parent = new Window('inactive');
+		this.resetGrandparent(west.parent, west, parent);
 
-		parent_window.parent_window = west.parent_window;
-		parent_window.west = west;
-		parent_window.east = east;
+		parent.parent = west.parent;
+		parent.west = west;
+		parent.east = east;
 		this.addWindow(east);
-		this.addWindow(parent_window);
-		east.parent_window = parent_window;
-		west.parent_window = parent_window;
-		this.updateParent(parent_window);
+		this.addWindow(parent);
+		east.parent = parent;
+		west.parent = parent;
+		this.updateParent(parent);
 
 		this.siftUpRootIfNecessary();
 		this.displayAll();
@@ -140,34 +140,34 @@ class TilingManager {
 	horizontalSplit(){
 		let north = this.current_window;
 		let south = new Window('inactive');
-		let parent_window = new Window('inactive');
-		this.resetGrandparent(north.parent_window, north, parent_window);
-		parent_window.parent_window = north.parent_window;
-		parent_window.north = north;
-		parent_window.south = south;
+		let parent = new Window('inactive');
+		this.resetGrandparent(north.parent, north, parent);
+		parent.parent = north.parent;
+		parent.north = north;
+		parent.south = south;
 		this.addWindow(south);
-		this.addWindow(parent_window);
-		north.parent_window = parent_window;
-		south.parent_window = parent_window;
-		this.updateParent(parent_window);
+		this.addWindow(parent);
+		north.parent = parent;
+		south.parent = parent;
+		this.updateParent(parent);
 
 		this.siftUpRootIfNecessary();
 		this.displayAll();
 	}
-	updateParent(parent_window){
-		while (parent_window != null){
-			if (parent_window.east != null && parent_window.west != null){
-				parent_window._relative_x = parent_window.east._relative_x + parent_window.west._relative_x;
-				parent_window._relative_y = Math.max(parent_window.east._relative_y, parent_window.west._relative_y);
+	updateParent(parent){
+		while (parent != null){
+			if (parent.east != null && parent.west != null){
+				parent._relative_x = parent.east._relative_x + parent.west._relative_x;
+				parent._relative_y = Math.max(parent.east._relative_y, parent.west._relative_y);
 			}
-			else if (parent_window.north != null && parent_window.south != null) {
-				parent_window._relative_x = Math.max(parent_window.north._relative_x, parent_window.south._relative_x);
-				parent_window._relative_y = parent_window.north._relative_y + parent_window.south._relative_y;
+			else if (parent.north != null && parent.south != null) {
+				parent._relative_x = Math.max(parent.north._relative_x, parent.south._relative_x);
+				parent._relative_y = parent.north._relative_y + parent.south._relative_y;
 			}
 			else {
 				console.log("something's very wrong");
 			}
-			parent_window = parent_window.parent_window;
+			parent = parent.parent;
 		}
 	}
 }
