@@ -235,6 +235,10 @@ document.addEventListener('keydown', function(event) {
 	console.log(tiling_manager)
 });
 
+window.addEventListener('resize', function() {
+	tiling_manager.displayAll();
+})
+
 function asPixel(value){
 	return value + 'px';
 }
