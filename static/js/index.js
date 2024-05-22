@@ -27,15 +27,26 @@ class WindowLeaf extends _Window {
 		this.div = document.createElement('div');
 		this.div.classList.add('window');
 		this.div.classList.add(state);
+		this.div.addEventListener('mouseover', () => {
+			this.div.classList.add('hover');
+		})
+		this.div.addEventListener('mouseout', () => {
+			this.div.classList.remove('hover');
+		})
+
+		this.selected = false;
+		this.div.addEventListener('click', () => {
+			this.selected = true;
+		})
 		this._relative_x = 1;
 		this._relative_y = 1;
 	}
 	setActive(){
-		this.div.classList.remove(this.state);
+		this.div.classList.remove('inactive');
 		this.div.classList.add('active');
 	}
 	setInactive(){
-		this.div.classList.remove(this.state);
+		this.div.classList.remove('active');
 		this.div.classList.add('inactive');
 	}
 }
@@ -48,6 +59,14 @@ class TilingManager {
 		this.div = div;
 		this.addWindowLeaf(this.active_window);
 		this.displayAll();
+		this.div.addEventListener('click', () => {
+			for (var current_window of this.windows){
+				if (current_window.selected){
+					current_window.selected = false;
+					this.setActiveWindow(current_window);
+				}
+			}
+		})
 	}
 
 	displayAll(){
@@ -190,14 +209,27 @@ class TilingManager {
 		this.active_window = new_window;
 		this.active_window.setActive();
 	}
+	getClosestDescendant(current_window){
+		// hacky, I don't recommend
+		while (current_window.isLeaf() == false){
+			for (let kid of [current_window.east, current_window.west, current_window.south, current_window.north]){
+				if (kid != null){
+					current_window = kid;
+					break;
+				}
+			}
+		}
+		return current_window;
+	}
 	closeActive(){
 		if (this.active_window.parent != null){
 			let current_window = this.active_window;
 			let sibling = this.getSibling(current_window);
+			let descendant = this.getClosestDescendant(sibling);
 			this.replaceParentKid(current_window.parent.parent, current_window.parent, sibling);
 			this.removeWindowLeafFromDiv(this.active_window);
-			this.setActiveWindow(sibling);
 			sibling.parent = current_window.parent.parent;
+			this.setActiveWindow(descendant);
 			this.updateAncestors(sibling.parent);
 			this.root = sibling;
 			this.siftUpRootIfNecessary();
