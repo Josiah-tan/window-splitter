@@ -1,3 +1,17 @@
+
+class Point {
+	constructor(x, y){
+		this.x = x;
+		this.y = y;
+	}
+	getEuclideanDistance2(point){
+		return (point.x - this.x) * (point.x - this.x) + (point.y - this.y) * (point.y - this.y);
+	}
+    toString() {
+        return `Point(${this.x}, ${this.y})`;
+    }
+}
+
 class _Window {
 	static instanceCount = 0;
 	constructor(parent = null){
@@ -48,6 +62,15 @@ class WindowLeaf extends _Window {
 	setInactive(){
 		this.div.classList.remove('active');
 		this.div.classList.add('inactive');
+	}
+	getMiddleCoordinates(){
+		let div_style = getComputedStyle(this.div);
+		let width = parseFloat(div_style.width);
+		let height = parseFloat(div_style.height);
+		let left = parseFloat(div_style.left);
+		let top = parseFloat(div_style.top);
+		
+		return new Point(width / 2 + left, height / 2 + top);
 	}
 }
 
@@ -209,31 +232,33 @@ class TilingManager {
 		this.active_window = new_window;
 		this.active_window.setActive();
 	}
-	getClosestDescendant(current_window){
-		// hacky, I don't recommend
-		while (current_window.isLeaf() == false){
-			for (let kid of [current_window.east, current_window.west, current_window.south, current_window.north]){
-				if (kid != null){
-					current_window = kid;
-					break;
-				}
+	getClosestWindow(middle_coordinates){
+		let closest = null;
+		let closest_distance = Number.MAX_VALUE;
+		for (var current_window of this.windows){
+			let current_middle_coordinates = current_window.getMiddleCoordinates()
+			let distance = current_middle_coordinates.getEuclideanDistance2(middle_coordinates) 
+			if (distance < closest_distance){
+				closest = current_window;
+				closest_distance = distance;
 			}
 		}
-		return current_window;
+		return closest;
 	}
 	closeActive(){
 		if (this.active_window.parent != null){
 			let current_window = this.active_window;
+			let middle_coordinates = current_window.getMiddleCoordinates();
 			let sibling = this.getSibling(current_window);
-			let descendant = this.getClosestDescendant(sibling);
 			this.replaceParentKid(current_window.parent.parent, current_window.parent, sibling);
 			this.removeWindowLeafFromDiv(this.active_window);
 			sibling.parent = current_window.parent.parent;
-			this.setActiveWindow(descendant);
 			this.updateAncestors(sibling.parent);
 			this.root = sibling;
 			this.siftUpRootIfNecessary();
 			this.displayAll();
+			let new_active_window = this.getClosestWindow(middle_coordinates);
+			this.setActiveWindow(new_active_window);
 		}
 	}
 	updateAncestors(parent){
