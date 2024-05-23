@@ -230,6 +230,7 @@ class TilingManager {
 		}
 	}
 	verticalSplitActive(){
+		if (this.zoomed_in) return;
 		let west = this.active_window;
 		let east = new WindowLeaf('inactive');
 		let parent = new WindowStem();
@@ -247,6 +248,7 @@ class TilingManager {
 		this.displayAll();
 	}
 	horizontalSplitActive(){
+		if (this.zoomed_in) return;
 		let north = this.active_window;
 		let south = new WindowLeaf('inactive');
 		let parent = new WindowStem();
