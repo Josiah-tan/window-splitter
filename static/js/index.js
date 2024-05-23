@@ -448,22 +448,26 @@ class TilingManager {
 		this.setActiveWindow(right_window);
 	}
 	toggleZoom(){
-		if (this.zoomed_in){
-			this.displayAll();
-		}
-		else {
-			this.active_window.div.style.top = '0';
-			this.active_window.div.style.left = '0';
-			this.active_window.div.style.width = '100%';
-			this.active_window.div.style.height = '100%';
-			let z_index = 0;
-			for (let current_window of this.windows){
-				let div_style = getComputedStyle(current_window.div);
-				z_index = Math.max(z_index, parseInt(div_style.zIndex));
+		if (this.active_window.parent != null){
+			if (this.zoomed_in){
+				this.displayAll();
 			}
-			this.active_window.div.style.zIndex = (z_index + 1).toString()
+			else {
+				this.active_window.div.style.top = '0';
+				this.active_window.div.style.left = '0';
+				this.active_window.div.style.width = '100%';
+				this.active_window.div.style.height = '100%';
+				let z_index = 0;
+				for (let current_window of this.windows){
+					let div_style = getComputedStyle(current_window.div);
+					z_index = Math.max(z_index, parseInt(div_style.zIndex));
+				}
+				this.active_window.div.style.zIndex = (z_index + 1).toString()
+			}
+			this.zoomed_in = !this.zoomed_in;
+		} else {
+			this.zoomed_in = false;
 		}
-		this.zoomed_in = !this.zoomed_in;
 	}
 	only(){
 		if (this.zoomed_in) {
