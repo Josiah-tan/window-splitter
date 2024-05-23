@@ -466,6 +466,7 @@ class TilingManager {
 		this.zoomed_in = !this.zoomed_in;
 	}
 	only(){
+		if (this.zoomed_in) return;
 		for (let current_window of this.windows){
 			if (current_window != this.active_window){
 				this.div.removeChild(current_window.div);
