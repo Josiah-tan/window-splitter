@@ -465,6 +465,17 @@ class TilingManager {
 		}
 		this.zoomed_in = !this.zoomed_in;
 	}
+	only(){
+		for (let current_window of this.windows){
+			if (current_window != this.active_window){
+				this.div.removeChild(current_window.div);
+			}
+		}
+		this.windows = new Set([this.active_window]);
+		this.active_window.parent = null;
+		this.root = this.active_window;
+		this.displayAll();
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -486,10 +497,10 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.switchRight();
 	} else if (event.key === 'z'){
 		tiling_manager.toggleZoom();
+	} else if (event.key === 'o'){
+		tiling_manager.only();
 	}
-
-	console.log(event.key)
-	// console.log(tiling_manager)
+	console.log(tiling_manager)
 });
 
 window.addEventListener('resize', function() {
