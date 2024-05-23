@@ -1,3 +1,7 @@
+function areClose(a, b, epsilon = Number.EPSILON) {
+    return Math.abs(a - b) < epsilon;
+}
+
 
 class Point {
 	constructor(x, y){
@@ -7,9 +11,30 @@ class Point {
 	getEuclideanDistance2(point){
 		return (point.x - this.x) * (point.x - this.x) + (point.y - this.y) * (point.y - this.y);
 	}
+	subtract(point){
+		return new Point(this.x - point.x, this.y - point.y);
+	}
     toString() {
         return `Point(${this.x}, ${this.y})`;
     }
+}
+
+class Segment {
+	constructor(first, second){
+		this.first = first;
+		this.second = second;
+	}
+	isOverlapping(segment){
+		return this.second >= segment.first && this.first <= segment.second
+	}
+	getOverlappingLength(segment){
+		if (this.isOverlapping(segment)){
+			 return Math.min(this.second, segment.second)- Math.max(this.first, segment.first);
+		}
+		else {
+			return 0;
+		}
+	}
 }
 
 class _Window {
@@ -63,14 +88,33 @@ class WindowLeaf extends _Window {
 		this.div.classList.remove('active');
 		this.div.classList.add('inactive');
 	}
-	getMiddleCoordinates(){
+	getDimensions() {
 		let div_style = getComputedStyle(this.div);
 		let width = parseFloat(div_style.width);
 		let height = parseFloat(div_style.height);
 		let left = parseFloat(div_style.left);
 		let top = parseFloat(div_style.top);
-		
+		return [width, height, left, top];
+	}
+	getMiddleCoordinates(){
+		const [width, height, left, top] = this.getDimensions()
 		return new Point(width / 2 + left, height / 2 + top);
+	}
+	getTopLeftCoordinates(){
+		const [, , left, top] = this.getDimensions()
+		return new Point(left, top);
+	}
+	getTopRightCoordinates(){
+		const [width, , left, top] = this.getDimensions()
+		return new Point(left + width, top);
+	}
+	getBottomRightCoordinates(){
+		const [width, height, left, top] = this.getDimensions()
+		return new Point(left + width, top + height);
+	}
+	getBottomLeftCoordinates(){
+		const [, height, left, top] = this.getDimensions()
+		return new Point(left, top + height);
 	}
 }
 
@@ -277,6 +321,129 @@ class TilingManager {
 			parent = parent.parent;
 		}
 	}
+	switchDown(){
+		let div_style = getComputedStyle(this.div);
+		let height = parseFloat(div_style.height);
+
+		
+		let {x: bottom_left_x, y: bottom} = this.active_window.getBottomLeftCoordinates()
+		let {x: bottom_right_x} = this.active_window.getBottomRightCoordinates()
+
+		// 0.2 ∵ accumulation of floating point errors
+		if (areClose(bottom, height, 0.2)){
+			bottom = 0;
+		}
+
+		let bottom_segment = new Segment(bottom_left_x, bottom_right_x);
+
+		let down_window = null;
+		let segment_longest = 0;
+		
+		for (var current_window of this.windows){
+			let {x: top_left_x, y: top} = current_window.getTopLeftCoordinates()
+			let {x: top_right_x} = current_window.getTopRightCoordinates()
+			let top_segment = new Segment(top_left_x, top_right_x);
+			if (areClose(top, bottom, 0.2)){
+				let segment_length = top_segment.getOverlappingLength(bottom_segment);
+				if (segment_length > segment_longest){
+					down_window = current_window;
+					segment_longest = segment_length;
+				}
+			}
+		}
+		this.setActiveWindow(down_window);
+	}
+	switchUp(){
+		let div_style = getComputedStyle(this.div);
+		let height = parseFloat(div_style.height);
+
+		
+		let {x: top_left_x, y: top} = this.active_window.getTopLeftCoordinates();
+		let {x: top_right_x} = this.active_window.getTopRightCoordinates();
+
+		if (top == 0){
+			top = height;
+		}
+
+		let top_segment = new Segment(top_left_x, top_right_x);
+
+		let up_window = null;
+		let segment_longest = 0;
+		
+		for (var current_window of this.windows){
+			let {x: bottom_left_x, y: bottom} = current_window.getBottomLeftCoordinates();
+			let {x: bottom_right_x} = current_window.getBottomRightCoordinates();
+			let bottom_segment = new Segment(bottom_left_x, bottom_right_x);
+			if (areClose(bottom, top, 0.2)){
+				let segment_length = bottom_segment.getOverlappingLength(top_segment);
+				if (segment_length > segment_longest){
+					up_window = current_window;
+					segment_longest = segment_length;
+				}
+			}
+		}
+		this.setActiveWindow(up_window);
+	}
+	switchLeft(){
+		let div_style = getComputedStyle(this.div);
+		let width = parseFloat(div_style.width);
+
+		let {x: left, y: top_left_y} = this.active_window.getTopLeftCoordinates();
+		let {y: bottom_left_y} = this.active_window.getBottomLeftCoordinates();
+
+		if (left === 0){
+			left = width;
+		}
+
+		let left_segment = new Segment(top_left_y, bottom_left_y);
+
+		let left_window = null;
+		let segment_longest = 0;
+
+		for (var current_window of this.windows){
+			let {x: right, y: top_right_y} = current_window.getTopRightCoordinates();
+			let {y: bottom_right_y} = current_window.getBottomRightCoordinates();
+			let right_segment = new Segment(top_right_y, bottom_right_y);
+			if (areClose(right, left, 0.2)){
+				let segment_length = right_segment.getOverlappingLength(left_segment);
+				if (segment_length > segment_longest){
+					left_window = current_window;
+					segment_longest = segment_length;
+				}
+			}
+		}
+		this.setActiveWindow(left_window);
+	}
+	switchRight(){
+    let div_style = getComputedStyle(this.div);
+    let width = parseFloat(div_style.width);
+
+    let {x: right, y: top_right_y} = this.active_window.getTopRightCoordinates();
+    let {y: bottom_right_y} = this.active_window.getBottomRightCoordinates();
+
+    if (areClose(right, width, 0.2)){
+        right = 0;
+    }
+
+    let right_segment = new Segment(top_right_y, bottom_right_y);
+
+    let right_window = null;
+    let segment_longest = 0;
+
+    for (var current_window of this.windows){
+        let {x: left, y: top_left_y} = current_window.getTopLeftCoordinates();
+        let {y: bottom_left_y} = current_window.getBottomLeftCoordinates();
+        let left_segment = new Segment(top_left_y, bottom_left_y);
+        if (areClose(right, left, 0.2)){
+            let segment_length = right_segment.getOverlappingLength(left_segment);
+            if (segment_length > segment_longest){
+                right_window = current_window;
+                segment_longest = segment_length;
+            }
+        }
+    }
+    this.setActiveWindow(right_window);
+}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -288,8 +455,18 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.horizontalSplitActive();
 	} else if (event.key === 'q') {
 		tiling_manager.closeActive();
+	} else if (event.key === 'ArrowDown') {
+		tiling_manager.switchDown();
+	} else if (event.key === 'ArrowUp') {
+		tiling_manager.switchUp();
+	} else if (event.key === 'ArrowLeft') {
+		tiling_manager.switchLeft();
+	} else if (event.key === 'ArrowRight') {
+		tiling_manager.switchRight();
 	}
-	console.log(tiling_manager)
+
+	console.log(event.key)
+	// console.log(tiling_manager)
 });
 
 window.addEventListener('resize', function() {
