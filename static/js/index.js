@@ -415,35 +415,35 @@ class TilingManager {
 		this.setActiveWindow(left_window);
 	}
 	switchRight(){
-    let div_style = getComputedStyle(this.div);
-    let width = parseFloat(div_style.width);
+		let div_style = getComputedStyle(this.div);
+		let width = parseFloat(div_style.width);
 
-    let {x: right, y: top_right_y} = this.active_window.getTopRightCoordinates();
-    let {y: bottom_right_y} = this.active_window.getBottomRightCoordinates();
+		let {x: right, y: top_right_y} = this.active_window.getTopRightCoordinates();
+		let {y: bottom_right_y} = this.active_window.getBottomRightCoordinates();
 
-    if (areClose(right, width, 0.2)){
-        right = 0;
-    }
+		if (areClose(right, width, 0.2)){
+			right = 0;
+		}
 
-    let right_segment = new Segment(top_right_y, bottom_right_y);
+		let right_segment = new Segment(top_right_y, bottom_right_y);
 
-    let right_window = null;
-    let segment_longest = 0;
+		let right_window = null;
+		let segment_longest = 0;
 
-    for (var current_window of this.windows){
-        let {x: left, y: top_left_y} = current_window.getTopLeftCoordinates();
-        let {y: bottom_left_y} = current_window.getBottomLeftCoordinates();
-        let left_segment = new Segment(top_left_y, bottom_left_y);
-        if (areClose(right, left, 0.2)){
-            let segment_length = right_segment.getOverlappingLength(left_segment);
-            if (segment_length > segment_longest){
-                right_window = current_window;
-                segment_longest = segment_length;
-            }
-        }
-    }
-    this.setActiveWindow(right_window);
-}
+		for (var current_window of this.windows){
+			let {x: left, y: top_left_y} = current_window.getTopLeftCoordinates();
+			let {y: bottom_left_y} = current_window.getBottomLeftCoordinates();
+			let left_segment = new Segment(top_left_y, bottom_left_y);
+			if (areClose(right, left, 0.2)){
+				let segment_length = right_segment.getOverlappingLength(left_segment);
+				if (segment_length > segment_longest){
+					right_window = current_window;
+					segment_longest = segment_length;
+				}
+			}
+		}
+		this.setActiveWindow(right_window);
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
