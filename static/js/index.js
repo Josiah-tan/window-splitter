@@ -134,6 +134,7 @@ class TilingManager {
 				}
 			}
 		})
+		this.zoomed_in = false;
 	}
 
 	displayAll(){
@@ -444,6 +445,24 @@ class TilingManager {
 		}
 		this.setActiveWindow(right_window);
 	}
+	toggleZoom(){
+		if (this.zoomed_in){
+			let div_style = getComputedStyle(this.active_window.div);
+			let z_index = parseInt(div_style.zIndex);
+			this.active_window.div.style.zIndex = (z_index + 1).toString()
+			this.displayAll();
+		}
+		else {
+			this.active_window.div.style.top = '0';
+			this.active_window.div.style.left = '0';
+			this.active_window.div.style.width = '100%';
+			this.active_window.div.style.height = '100%';
+			let div_style = getComputedStyle(this.active_window.div);
+			let z_index = parseInt(div_style.zIndex);
+			this.active_window.div.style.zIndex = (z_index + 1).toString()
+		}
+		this.zoomed_in = !this.zoomed_in;
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -463,6 +482,8 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.switchLeft();
 	} else if (event.key === 'ArrowRight') {
 		tiling_manager.switchRight();
+	} else if (event.key === 'z'){
+		tiling_manager.toggleZoom();
 	}
 
 	console.log(event.key)
