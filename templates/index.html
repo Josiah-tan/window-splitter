@@ -16,6 +16,10 @@
 			height: 0%;
 			width: 0%;
 			z-index: 0;
+			display: flex;
+			font-size: 5vw;
+			align-items: center;
+			justify-content: center;
         }
         .window.active {
 			box-sizing: border-box;
@@ -34,6 +38,7 @@
 </head>
 <body>
     <!-- <div class="window active"></div> -->
+	<script type="module" src="{{ url_for('static', filename='js/stack.js') }}"></script>
 	<script type="module" src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

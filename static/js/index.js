@@ -1,3 +1,4 @@
+import {Stack} from "./stack.js"
 function areClose(a, b, epsilon = Number.EPSILON) {
     return Math.abs(a - b) < epsilon;
 }
@@ -483,6 +484,23 @@ class TilingManager {
 		this.root = this.active_window;
 		this.displayAll();
 	}
+	showNumberOrderDfs(current_window){
+			if (current_window.isLeaf()){
+				current_window.div.textContent = this.temporary_counter;
+				this.temporary_counter++;
+			}
+			else {
+				for (let kid of [current_window.west, current_window.east, current_window.north, current_window.south]){
+					if (kid != null){
+						this.showNumberOrderDfs(kid);
+					}
+				}
+			}
+	}
+	showNumberOrder(){
+		this.temporary_counter = 0;
+		this.showNumberOrderDfs(this.root);
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -506,6 +524,8 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.toggleZoom();
 	} else if (event.key === 'o'){
 		tiling_manager.only();
+	} else if (event.key === 'n'){
+		tiling_manager.showNumberOrder();
 	}
 	console.log(tiling_manager)
 });
