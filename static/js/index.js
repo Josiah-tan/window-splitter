@@ -136,6 +136,7 @@ class TilingManager {
 			}
 		})
 		this.zoomed_in = false;
+		this.showing_number_order = false;
 	}
 
 	displayAll(){
@@ -145,6 +146,9 @@ class TilingManager {
 		let top = 0;
 		let left = 0;
 		this.displayNode(this.root, width, height, top, left);
+		if (this.showing_number_order){
+			this.showNumberOrder();
+		}
 	}
 
 	displayNode(current_window, width, height, top, left){
@@ -485,6 +489,7 @@ class TilingManager {
 		this.displayAll();
 	}
 	showNumberOrder(){
+		this.showing_number_order = true;
 		let counter = 0;
 		let stack = new Stack();
 		let visited = new Set();
@@ -514,6 +519,16 @@ class TilingManager {
 			}
 		}
 	}
+	toggleShowNumberOrder(){
+		this.showing_number_order = !this.showing_number_order;
+		if (this.showing_number_order){
+			this.showNumberOrder();
+		} else {
+			for (let current_window of this.windows){
+				current_window.div.textContent = "";
+			}
+		}
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -538,7 +553,7 @@ document.addEventListener('keydown', function(event) {
 	} else if (event.key === 'o'){
 		tiling_manager.only();
 	} else if (event.key === 'n'){
-		tiling_manager.showNumberOrder();
+		tiling_manager.toggleShowNumberOrder();
 	}
 	console.log(tiling_manager)
 });
