@@ -497,7 +497,18 @@ class TilingManager {
 		while (!stack.isEmpty()){
 			let current_window = stack.peek();
 			if (current_window.isLeaf()){
-				current_window.div.textContent = counter;
+				let number_order = current_window.div.getElementsByClassName('number-order');
+
+				var new_paragraph;
+				if (Array.from(number_order).length == 0){
+					new_paragraph = document.createElement('p');
+					new_paragraph.classList.add("number-order")
+					current_window.div.appendChild(new_paragraph);
+				}
+				else {
+					new_paragraph = number_order[0];
+				}
+				new_paragraph.textContent = counter;
 				counter++;
 				stack.pop();
 			} else {
@@ -525,7 +536,10 @@ class TilingManager {
 			this.showNumberOrder();
 		} else {
 			for (let current_window of this.windows){
-				current_window.div.textContent = "";
+				let number_order = current_window.div.getElementsByClassName('number-order');
+				Array.from(number_order).forEach(function(child){
+					child.parentNode.removeChild(child);
+				})
 			}
 		}
 	}
