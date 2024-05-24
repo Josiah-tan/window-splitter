@@ -509,6 +509,10 @@ class TilingManager {
 					new_paragraph = number_order[0];
 				}
 				new_paragraph.textContent = counter;
+				let div_style = getComputedStyle(current_window.div);
+				let width = parseFloat(div_style.width);
+				let height = parseFloat(div_style.height);
+				new_paragraph.style.fontSize = asPixel(Math.min(width / counter.toString().length / 2, height / 2))
 				counter++;
 				stack.pop();
 			} else {
