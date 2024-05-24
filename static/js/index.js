@@ -484,22 +484,35 @@ class TilingManager {
 		this.root = this.active_window;
 		this.displayAll();
 	}
-	showNumberOrderDfs(current_window){
+	showNumberOrder(){
+		let counter = 0;
+		let stack = new Stack();
+		let visited = new Set();
+		stack.push(this.root);
+		while (!stack.isEmpty()){
+			let current_window = stack.peek();
 			if (current_window.isLeaf()){
-				current_window.div.textContent = this.temporary_counter;
-				this.temporary_counter++;
-			}
-			else {
-				for (let kid of [current_window.west, current_window.east, current_window.north, current_window.south]){
-					if (kid != null){
-						this.showNumberOrderDfs(kid);
+				current_window.div.textContent = counter;
+				counter++;
+				stack.pop();
+			} else {
+				if (visited.has(current_window)){
+					stack.pop();
+					if (current_window.east != null){
+						stack.push(current_window.east);
+					} else {
+						stack.push(current_window.south);
+					}
+				} else {
+					visited.add(current_window);
+					if (current_window.west != null){
+						stack.push(current_window.west);
+					} else {
+						stack.push(current_window.north);
 					}
 				}
 			}
-	}
-	showNumberOrder(){
-		this.temporary_counter = 0;
-		this.showNumberOrderDfs(this.root);
+		}
 	}
 }
 
