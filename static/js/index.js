@@ -120,9 +120,14 @@ class WindowLeaf extends _Window {
 }
 
 class TilingManager {
-	constructor(div = document.body){
+	constructor(div = document.body, max_number_windows = 20){
+		this.max_number_windows = max_number_windows;
 		this.windows = new Set();
-		this.active_window = new WindowLeaf('active');
+		this._number_windows = 0;
+		this.active_window = this._createNewWindow();
+		if (this.active_window == null){
+			console.log("something is very wrong")
+		}
 		this.root = this.active_window;
 		this.div = div;
 		this.addWindowLeaf(this.active_window);
@@ -138,7 +143,13 @@ class TilingManager {
 		this.zoomed_in = false;
 		this.showing_number_order = false;
 	}
-
+	_createNewWindow(state){
+		if (this._number_windows == this.max_number_windows){
+			return null;
+		} else {
+			return new WindowLeaf(state);
+		}
+	}
 	displayAll(){
 		let div_style = getComputedStyle(this.div);
 		let width = parseFloat(div_style.width);
@@ -203,11 +214,13 @@ class TilingManager {
 	}
 
 	addWindowLeaf(new_window){
+		this._number_windows++;
 		this.windows.add(new_window);
 		this.div.appendChild(new_window.div);
 	}
 
 	removeWindowLeafFromDiv(old_window){
+		this._number_windows--;
 		this.windows.delete(old_window);
 		this.div.removeChild(old_window.div);
 	}
@@ -237,7 +250,11 @@ class TilingManager {
 	verticalSplitActive(){
 		if (this.zoomed_in) return;
 		let west = this.active_window;
-		let east = new WindowLeaf('inactive');
+		let east = this._createNewWindow('inactive');
+		if (east == null){
+			alert(`max windows (${this.max_number_windows}) reached, cannot vertical split)`)
+			return;
+		}
 		let parent = new WindowStem();
 		this.replaceParentKid(west.parent, west, parent);
 
@@ -255,7 +272,11 @@ class TilingManager {
 	horizontalSplitActive(){
 		if (this.zoomed_in) return;
 		let north = this.active_window;
-		let south = new WindowLeaf('inactive');
+		let south = this._createNewWindow('inactive');
+		if (south == null){
+			alert(`max windows (${this.max_number_windows}) reached, cannot horizontal split)`)
+			return;
+		}
 		let parent = new WindowStem();
 		this.replaceParentKid(north.parent, north, parent);
 
@@ -480,12 +501,14 @@ class TilingManager {
 		}
 		for (let current_window of this.windows){
 			if (current_window != this.active_window){
-				this.div.removeChild(current_window.div);
+				// this.div.removeChild(current_window.div);
+				this.removeWindowLeafFromDiv(current_window);
 			}
 		}
-		this.windows = new Set([this.active_window]);
+		// this.windows = new Set([this.active_window]);
 		this.active_window.parent = null;
 		this.root = this.active_window;
+		// this._number_windows = 1;
 		this.displayAll();
 	}
 	showNumberOrder(){
