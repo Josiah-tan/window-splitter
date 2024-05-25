@@ -501,14 +501,11 @@ class TilingManager {
 		}
 		for (let current_window of this.windows){
 			if (current_window != this.active_window){
-				// this.div.removeChild(current_window.div);
 				this.removeWindowLeafFromDiv(current_window);
 			}
 		}
-		// this.windows = new Set([this.active_window]);
 		this.active_window.parent = null;
 		this.root = this.active_window;
-		// this._number_windows = 1;
 		this.displayAll();
 	}
 	showNumberOrder(){
