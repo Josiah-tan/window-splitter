@@ -597,6 +597,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 window.addEventListener('resize', function() {
+	if (tiling_manager.zoomed_in) return;
 	tiling_manager.displayAll();
 })
 
