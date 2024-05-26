@@ -156,6 +156,11 @@ class TilingManager {
 			}
 		})
 
+		this.div.addEventListener('dragstart', (event) => {
+			// hot fix: disable all dragging ghost effects
+			event.preventDefault();
+		})
+
 		this.dragstart = null;
 		this.div.addEventListener('mousedown', () => {
 			for (var current_window of this.windows){
