@@ -78,6 +78,12 @@ class WindowLeaf extends _Window {
 		this.div.addEventListener('click', () => {
 			this.selected = true;
 		})
+
+		this.dragstart = false;
+		this.div.addEventListener('mousedown', () => {
+			this.dragstart = true;
+		})	
+
 		this._relative_x = 1;
 		this._relative_y = 1;
 	}
@@ -96,6 +102,14 @@ class WindowLeaf extends _Window {
 		let left = parseFloat(div_style.left);
 		let top = parseFloat(div_style.top);
 		return [width, height, left, top];
+	}
+	isContained(x, y){
+		let {x: x_min, y: y_min} = this.getTopLeftCoordinates();
+		let {x: x_max, y: y_max} = this.getBottomRightCoordinates();
+		return (
+			(x >= x_min && x <= x_max) &&
+			(y >= y_min && y <= y_max)
+		)
 	}
 	getMiddleCoordinates(){
 		const [width, height, left, top] = this.getDimensions()
@@ -132,6 +146,7 @@ class TilingManager {
 		this.div = div;
 		this.addWindowLeaf(this.active_window);
 		this.displayAll();
+		
 		this.div.addEventListener('click', () => {
 			for (var current_window of this.windows){
 				if (current_window.selected){
@@ -140,6 +155,33 @@ class TilingManager {
 				}
 			}
 		})
+
+		this.dragstart = null;
+		this.div.addEventListener('mousedown', () => {
+			for (var current_window of this.windows){
+				if (current_window.dragstart){
+					current_window.dragstart = false;
+					this.dragstart = current_window;
+					break;
+				}
+			}
+		})
+
+		this.dragdrop = null;
+		this.div.addEventListener('mouseup', (event) => {
+			const x = event.clientX;
+			const y = event.clientY;
+			for (var current_window of this.windows){
+				if (current_window.isContained(x, y)){
+					this.dragdrop = current_window;
+					this._handleDragDrop(x, y);
+					break;
+				}
+			}
+			this.dragstart = null;
+			this.dragdrop = null;
+		})
+
 		this.zoomed_in = false;
 		this.showing_number_order = false;
 	}
@@ -149,6 +191,33 @@ class TilingManager {
 		} else {
 			return new WindowLeaf(state);
 		}
+	}
+	_handleDragDrop(x, y){
+		let dragdrop_parent = this.dragdrop.parent;
+		let dragstart_parent = this.dragstart.parent;
+
+		if (this.dragdrop == this.dragstart){
+			// do nothing
+		}
+		else if (dragdrop_parent === dragstart_parent){
+			if (dragdrop_parent.west != null && dragdrop_parent.east != null){
+				[dragdrop_parent.west, dragdrop_parent.east] = [dragdrop_parent.east, dragdrop_parent.west]
+			}
+			else if (dragdrop_parent.north != null && dragdrop_parent.south != null){
+				[dragdrop_parent.north, dragdrop_parent.south] = [dragdrop_parent.south, dragdrop_parent.north]
+			}
+			else {
+				console.log("something's very wrong")
+			}
+		}
+		else {
+			this.replaceParentKid(dragdrop_parent, this.dragdrop, this.dragstart);
+			this.replaceParentKid(dragstart_parent, this.dragstart, this.dragdrop);
+			this.dragdrop.parent = dragstart_parent;
+			this.dragstart.parent = dragdrop_parent;
+		}
+
+		this.displayAll();
 	}
 	displayAll(){
 		let div_style = getComputedStyle(this.div);
@@ -318,21 +387,25 @@ class TilingManager {
 		}
 		return closest;
 	}
-	closeActive(){
-		if (this.active_window.parent != null){
-			let current_window = this.active_window;
+	_closeWindow(current_window){
+		if (current_window.parent != null){
 			let middle_coordinates = current_window.getMiddleCoordinates();
 			let sibling = this.getSibling(current_window);
 			this.replaceParentKid(current_window.parent.parent, current_window.parent, sibling);
-			this.removeWindowLeafFromDiv(this.active_window);
+			this.removeWindowLeafFromDiv(current_window);
 			sibling.parent = current_window.parent.parent;
 			this.updateAncestors(sibling.parent);
 			this.root = sibling;
 			this.siftUpRootIfNecessary();
 			this.displayAll();
-			let new_active_window = this.getClosestWindow(middle_coordinates);
-			this.setActiveWindow(new_active_window);
+			if (current_window == this.active_window){
+				let new_active_window = this.getClosestWindow(middle_coordinates);
+				this.setActiveWindow(new_active_window);
+			}
 		}
+	}
+	closeActive(){
+		this._closeWindow(this.active_window);
 	}
 	updateAncestors(parent){
 		while (parent != null){
