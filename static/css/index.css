@@ -9,11 +9,16 @@ body, html {
 	height: 0%;
 	width: 0%;
 	z-index: 0;
+}
+.window .number-order {
+	position: absolute;
+	height: 100%;
+	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
-.window p.number-order {
+.window .number-order p{
 	opacity: 50%;
 	user-select: none; /*disable highlighting*/
 }

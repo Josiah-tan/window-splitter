@@ -558,17 +558,21 @@ class TilingManager {
 		while (!stack.isEmpty()){
 			let current_window = stack.peek();
 			if (current_window.isLeaf()){
-				let number_order = current_window.div.getElementsByClassName('number-order');
+				let number_order_divs = current_window.div.getElementsByClassName('number-order');
 
+				var number_order_div;
 				var new_paragraph;
-				if (Array.from(number_order).length == 0){
+				if (Array.from(number_order_divs).length == 0){
+					number_order_div = document.createElement('div');
+					number_order_div.classList.add("number-order")
 					new_paragraph = document.createElement('p');
-					new_paragraph.classList.add("number-order")
-					current_window.div.appendChild(new_paragraph);
+					number_order_div.appendChild(new_paragraph);
+					current_window.div.appendChild(number_order_div);
 				}
 				else {
-					new_paragraph = number_order[0];
+					number_order_div = number_order_divs[0];
 				}
+				new_paragraph = number_order_div.getElementsByTagName("p")[0]
 				new_paragraph.textContent = counter;
 				let div_style = getComputedStyle(current_window.div);
 				let width = parseFloat(div_style.width);
