@@ -1,42 +1,5 @@
-import {Stack} from "./stack.js"
-function areClose(a, b, epsilon = Number.EPSILON) {
-    return Math.abs(a - b) < epsilon;
-}
-
-
-class Point {
-	constructor(x, y){
-		this.x = x;
-		this.y = y;
-	}
-	getEuclideanDistance2(point){
-		return (point.x - this.x) * (point.x - this.x) + (point.y - this.y) * (point.y - this.y);
-	}
-	subtract(point){
-		return new Point(this.x - point.x, this.y - point.y);
-	}
-    toString() {
-        return `Point(${this.x}, ${this.y})`;
-    }
-}
-
-class Segment {
-	constructor(first, second){
-		this.first = first;
-		this.second = second;
-	}
-	isOverlapping(segment){
-		return this.second >= segment.first && this.first <= segment.second
-	}
-	getOverlappingLength(segment){
-		if (this.isOverlapping(segment)){
-			 return Math.min(this.second, segment.second)- Math.max(this.first, segment.first);
-		}
-		else {
-			return 0;
-		}
-	}
-}
+import { Stack } from "./stack.js"
+import { asPixel, areClose, Point, Segment } from "./math.js";
 
 class _Window {
 	static instanceCount = 0;
@@ -645,6 +608,9 @@ class TilingManager {
 			}
 		}
 	}
+	setActivePlot(plot_json){
+		Plotly.newPlot(this.active_window.div, plot_json.data, plot_json.layout, {'responsive': true});
+	}
 }
 
 var tiling_manager = new TilingManager(document.body)
@@ -679,13 +645,13 @@ window.addEventListener('resize', function() {
 	tiling_manager.displayAll();
 })
 
-function asPixel(value){
-	return value + 'px';
-}
 
 document.addEventListener('DOMContentLoaded', function() {
 	var socket = io.connect('http://' + document.domain + ':' + location.port);
 	socket.on('update', function(data) {
-		console.log(JSON.stringify(data));
+		if (data.command == "setActivePlot"){
+			var plot_json = JSON.parse(data.data);
+			tiling_manager.setActivePlot(plot_json);
+		}
 	});
 });
