@@ -17,6 +17,7 @@ body, html {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	pointer-events: none;
 }
 .window .number-order p{
 	opacity: 50%;
