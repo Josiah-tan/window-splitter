@@ -1,0 +1,33 @@
+body, html {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+}
+.window {
+	position: absolute;
+	height: 0%;
+	width: 0%;
+	z-index: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.window p.number-order {
+	opacity: 50%;
+	user-select: none; /*disable highlighting*/
+}
+.window.active {
+	box-sizing: border-box;
+	border: 2px solid black;
+	background-color: orange;
+}
+.window.inactive {
+	box-sizing: border-box;
+	border: 1px solid black;
+	background-color: grey;
+}
+.window.inactive.hover {
+	background-color: green;
+}
+
