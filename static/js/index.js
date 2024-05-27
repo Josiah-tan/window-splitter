@@ -682,3 +682,10 @@ window.addEventListener('resize', function() {
 function asPixel(value){
 	return value + 'px';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+	var socket = io.connect('http://' + document.domain + ':' + location.port);
+	socket.on('update', function(data) {
+		console.log(JSON.stringify(data));
+	});
+});
