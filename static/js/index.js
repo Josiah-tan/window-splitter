@@ -30,6 +30,8 @@ class WindowLeaf extends _Window {
 		this.div = document.createElement('div');
 		this.div.classList.add('window');
 		this.div.classList.add(state);
+		this.plot_json_ptrs = [];
+		this.plot_ptr = -1;
 		this.div.addEventListener('mouseover', () => {
 			this.div.classList.add('hover');
 		})
@@ -49,6 +51,23 @@ class WindowLeaf extends _Window {
 
 		this._relative_x = 1;
 		this._relative_y = 1;
+	}
+	addNewPlot(lookup){
+		this.plot_json_ptrs.push(lookup);
+	}
+	showLatestPlot(plots_json){
+		this.plot_ptr = -1;
+		var lookup = this.getCurrentPlot();
+		var plot_json = plots_json[lookup];
+		Plotly.newPlot(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+	}
+	getCurrentPlot(){
+		if (this.plot_json_ptrs.length == 0){
+			return null;
+		}
+		else {
+			return this.plot_json_ptrs[(this.plot_json_ptrs.length + this.plot_ptr) % this.plot_json_ptrs.length];
+		}
 	}
 	setActive(){
 		this.div.classList.remove('inactive');
@@ -100,6 +119,7 @@ class TilingManager {
 	constructor(div = document.body, max_number_windows = 20){
 		this.max_number_windows = max_number_windows;
 		this.windows = new Set();
+		this.plots_json = {};
 		this._number_windows = 0;
 		this.active_window = this._createNewWindow();
 		if (this.active_window == null){
@@ -612,8 +632,40 @@ class TilingManager {
 			}
 		}
 	}
-	setActivePlot(plot_json){
-		Plotly.newPlot(this.active_window.div, plot_json.data, plot_json.layout, {'responsive': true});
+	setActiveNewPlot(plot_json){
+		var lookup = plot_json.layout.title.text;
+		console.log("lookup: ")
+		console.log(lookup)
+		// console.log(lookup)
+		this.plots_json[lookup] = plot_json;
+		console.log("this.plots_json");
+		console.log(this.plots_json);
+		
+		this.active_window.addNewPlot(lookup);
+		this.active_window.showLatestPlot(this.plots_json);
+	}
+	applyColorScheme(colorscheme_template){
+		var background_color = colorscheme_template.layout.paper_bgcolor
+		var font_color = colorscheme_template.layout.font.color
+		this.div.style.color = font_color
+		this.div.style.backgroundColor = background_color
+		this.div.style.borderColor = font_color
+
+		for (var lookup in this.plots_json){
+			this.plots_json[lookup].layout.template = colorscheme_template;
+		}
+		console.log(this.plots_json);
+		for (var current_window of this.windows){
+			var lookup = current_window.getCurrentPlot()
+			if (lookup != null){
+				// console.log(`current_window = `)
+				// console.log(current_window);
+				// console.log(`lookup = `)
+				// console.log(lookup)
+				// console.log(this.plots_json[lookup].layout);
+				Plotly.relayout(current_window.div, this.plots_json[lookup].layout);
+			}
+		}
 	}
 }
 
@@ -655,7 +707,23 @@ document.addEventListener('DOMContentLoaded', function() {
 	socket.on('update', function(data) {
 		if (data.command == "setActivePlot"){
 			var plot_json = JSON.parse(data.data);
-			tiling_manager.setActivePlot(plot_json);
+			tiling_manager.setActiveNewPlot(plot_json);
+		}
+		if (data.command == "setColorscheme"){
+			fetchColorschemeData();
+			// var colorscheme_template = fetchColorschemeData();
+			// tiling_manager.applyColorScheme(colorscheme_template);
 		}
 	});
 });
+
+function fetchColorschemeData() {
+	var colorscheme_template
+	fetch('/colorscheme-data')
+		.then(response => response.json())
+		.then(data => {
+			colorscheme_template = data.template;
+			tiling_manager.applyColorScheme(colorscheme_template);
+			})
+		.catch(error => console.error('error fetching colorscheme-data:', error));
+}

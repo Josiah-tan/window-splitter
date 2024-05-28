@@ -11,7 +11,7 @@ y_data = [10, 11, 12, 13, 14]
 trace = go.Scatter(x=x_data, y=y_data, mode='markers+lines', name='Sample Data')
 
 # Create layout
-layout = go.Layout(title='Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
+layout = go.Layout(title='2Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
 
 # Create figure
 fig = go.Figure(data=[trace], layout=layout)
@@ -25,3 +25,10 @@ if response.status_code == 200:
 else:
     print("Failed to send data")
 
+
+data = {"command": "setColorscheme"}
+response = requests.post(url, json=data)
+if response.status_code == 200:
+    print ("Data sent successfully")
+else:
+    print("Failed to send data")
