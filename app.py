@@ -17,9 +17,10 @@ def update_state():
     socketio.emit('update', data)
     return jsonify(success=True)
 
-@app.route('/colorscheme-data')
+@app.route('/colorscheme-data', methods=['POST'])
 def colorSchemeData():
-    template = pio.templates["gruvbox_dark"]
+    data = request.get_json();
+    template = pio.templates[data]
     return jsonify({"template": template.to_plotly_json()})
 
 if __name__ == '__main__':

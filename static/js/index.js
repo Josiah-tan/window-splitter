@@ -699,20 +699,26 @@ document.addEventListener('DOMContentLoaded', function() {
 			tiling_manager.setActiveNewPlot(plot_json);
 		}
 		if (data.command == "setColorscheme"){
-			fetchColorschemeData();
-			// var colorscheme_template = fetchColorschemeData();
-			// tiling_manager.applyColorScheme(colorscheme_template);
+			console.log("data.data");
+			console.log(data.data);
+			fetchColorschemeData(data.data);
 		}
 	});
 });
 
-function fetchColorschemeData() {
+function fetchColorschemeData(colorscheme) {
 	var colorscheme_template
-	fetch('/colorscheme-data')
+	fetch('/colorscheme-data', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(colorscheme)
+	})
 		.then(response => response.json())
 		.then(data => {
 			colorscheme_template = data.template;
 			tiling_manager.applyColorScheme(colorscheme_template);
-			})
+		})
 		.catch(error => console.error('error fetching colorscheme-data:', error));
 }

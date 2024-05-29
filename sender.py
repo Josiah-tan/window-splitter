@@ -25,8 +25,9 @@ if response.status_code == 200:
 else:
     print("Failed to send data")
 
+##
 
-data = {"command": "setColorscheme"}
+data = {"data":"gruvbox_light", "command": "setColorscheme"}
 response = requests.post(url, json=data)
 if response.status_code == 200:
     print ("Data sent successfully")
