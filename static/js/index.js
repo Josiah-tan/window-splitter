@@ -634,12 +634,7 @@ class TilingManager {
 	}
 	setActiveNewPlot(plot_json){
 		var lookup = plot_json.layout.title.text;
-		console.log("lookup: ")
-		console.log(lookup)
-		// console.log(lookup)
 		this.plots_json[lookup] = plot_json;
-		console.log("this.plots_json");
-		console.log(this.plots_json);
 		
 		this.active_window.addNewPlot(lookup);
 		this.active_window.showLatestPlot(this.plots_json);
@@ -654,15 +649,9 @@ class TilingManager {
 		for (var lookup in this.plots_json){
 			this.plots_json[lookup].layout.template = colorscheme_template;
 		}
-		console.log(this.plots_json);
 		for (var current_window of this.windows){
 			var lookup = current_window.getCurrentPlot()
 			if (lookup != null){
-				// console.log(`current_window = `)
-				// console.log(current_window);
-				// console.log(`lookup = `)
-				// console.log(lookup)
-				// console.log(this.plots_json[lookup].layout);
 				Plotly.relayout(current_window.div, this.plots_json[lookup].layout);
 			}
 		}
