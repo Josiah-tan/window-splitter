@@ -223,6 +223,14 @@ class TilingManager {
 		if (this.showing_number_order){
 			this.showNumberOrder();
 		}
+		this.allPlotsHandleResize();
+	}
+	allPlotsHandleResize(){
+		for (var current_window of this.windows){
+			if (current_window.plot_json_ptrs.length > 0){
+				current_window.div._responsiveChartHandler();
+			}
+		}
 	}
 
 	displayNode(current_window, width, height, top, left){
