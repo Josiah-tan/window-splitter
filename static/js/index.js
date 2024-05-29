@@ -699,8 +699,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			tiling_manager.setActiveNewPlot(plot_json);
 		}
 		if (data.command == "setColorscheme"){
-			console.log("data.data");
-			console.log(data.data);
 			fetchColorschemeData(data.data);
 		}
 	});
