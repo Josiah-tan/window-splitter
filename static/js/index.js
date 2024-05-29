@@ -52,6 +52,12 @@ class WindowLeaf extends _Window {
 		this._relative_x = 1;
 		this._relative_y = 1;
 	}
+	showNextPlot(plots_json, increment){
+		this.plot_ptr += increment;
+		var lookup = this.getCurrentPlot();
+		var plot_json = plots_json[lookup];
+		Plotly.newPlot(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+	}
 	addNewPlot(lookup){
 		this.plot_json_ptrs.push(lookup);
 	}
@@ -639,6 +645,9 @@ class TilingManager {
 		this.active_window.addNewPlot(lookup);
 		this.active_window.showLatestPlot(this.plots_json);
 	}
+	setActiveNextPlot(increment){
+		this.active_window.showNextPlot(this.plots_json, increment);
+	}
 	applyColorScheme(colorscheme_template){
 		var background_color = colorscheme_template.layout.paper_bgcolor
 		var font_color = colorscheme_template.layout.font.color
@@ -681,6 +690,10 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.only();
 	} else if (event.key === 'n'){
 		tiling_manager.toggleShowNumberOrder();
+	} else if (event.key === 'f'){
+		tiling_manager.setActiveNextPlot(1);
+	} else if (event.key == 'F'){
+		tiling_manager.setActiveNextPlot(-1);
 	}
 	console.log(tiling_manager)
 });
