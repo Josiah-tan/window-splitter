@@ -111,6 +111,10 @@ class WindowLeaf extends _Window {
 		const [, height, left, top] = this.getDimensions();
 		return new Point(left, height / 2 + top);
 	}
+	getTopMiddleCoordinates(){
+		const [width, , left, top] = this.getDimensions();
+		return new Point(left + width / 2, top);
+	}
 	getTopLeftCoordinates(){
 		const [, , left, top] = this.getDimensions()
 		return new Point(left, top);
@@ -469,32 +473,23 @@ class TilingManager {
 		let div_style = getComputedStyle(this.div);
 		let height = parseFloat(div_style.height);
 
-		
-		let {x: top_left_x, y: top} = this.active_window.getTopLeftCoordinates();
-		let {x: top_right_x} = this.active_window.getTopRightCoordinates();
+		let {x: top_middle_x, y: top} = this.active_window.getTopMiddleCoordinates();
 
 		if (top == 0){
 			top = height;
 		}
-
-		let top_segment = new Segment(top_left_x, top_right_x);
-
-		let up_window = null;
-		let segment_longest = 0;
 		
 		for (var current_window of this.windows){
 			let {x: bottom_left_x, y: bottom} = current_window.getBottomLeftCoordinates();
 			let {x: bottom_right_x} = current_window.getBottomRightCoordinates();
 			let bottom_segment = new Segment(bottom_left_x, bottom_right_x);
 			if (areClose(bottom, top, 0.2)){
-				let segment_length = bottom_segment.getOverlappingLength(top_segment);
-				if (segment_length > segment_longest){
-					up_window = current_window;
-					segment_longest = segment_length;
+				if (bottom_segment.doesContain(top_middle_x)){
+					this.setActiveWindow(current_window);
+					break;
 				}
 			}
 		}
-		this.setActiveWindow(up_window);
 	}
 	switchLeft(){
 		let div_style = getComputedStyle(this.div);
