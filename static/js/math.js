@@ -22,6 +22,10 @@ export class Segment {
 	isOverlapping(segment){
 		return this.second >= segment.first && this.first <= segment.second
 	}
+	doesContain(value){
+		return (Math.min(this.first, this.second) <= value && value <= Math.max(this.first, this.second)) ||
+			areClose(this.first, value, 0.2) || areClose(this.second, value, 0.2);
+	}
 	getOverlappingLength(segment){
 		if (this.isOverlapping(segment)){
 			 return Math.min(this.second, segment.second)- Math.max(this.first, segment.first);

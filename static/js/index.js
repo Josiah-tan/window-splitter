@@ -103,6 +103,10 @@ class WindowLeaf extends _Window {
 		const [width, height, left, top] = this.getDimensions()
 		return new Point(width / 2 + left, height / 2 + top);
 	}
+	getMiddleRightCoordinates(){
+		const [width, height, left, top] = this.getDimensions();
+		return new Point(left + width, height / 2 + top);
+	}
 	getTopLeftCoordinates(){
 		const [, , left, top] = this.getDimensions()
 		return new Point(left, top);
@@ -522,31 +526,22 @@ class TilingManager {
 		let div_style = getComputedStyle(this.div);
 		let width = parseFloat(div_style.width);
 
-		let {x: right, y: top_right_y} = this.active_window.getTopRightCoordinates();
-		let {y: bottom_right_y} = this.active_window.getBottomRightCoordinates();
-
+		let {x: right, y: middle_right_y} = this.active_window.getMiddleRightCoordinates();
 		if (areClose(right, width, 0.2)){
 			right = 0;
 		}
-
-		let right_segment = new Segment(top_right_y, bottom_right_y);
-
-		let right_window = null;
-		let segment_longest = 0;
-
+		
 		for (var current_window of this.windows){
 			let {x: left, y: top_left_y} = current_window.getTopLeftCoordinates();
 			let {y: bottom_left_y} = current_window.getBottomLeftCoordinates();
 			let left_segment = new Segment(top_left_y, bottom_left_y);
 			if (areClose(right, left, 0.2)){
-				let segment_length = right_segment.getOverlappingLength(left_segment);
-				if (segment_length > segment_longest){
-					right_window = current_window;
-					segment_longest = segment_length;
+				if (left_segment.doesContain(middle_right_y)){
+					this.setActiveWindow(current_window);
+					break;
 				}
 			}
 		}
-		this.setActiveWindow(right_window);
 	}
 	toggleZoom(){
 		if (this.active_window.parent != null){
@@ -702,6 +697,8 @@ document.addEventListener('keydown', function(event) {
 		tiling_manager.setActiveNextPlot(1);
 	} else if (event.key == 'F'){
 		tiling_manager.setActiveNextPlot(-1);
+	} else if ((event.key == 'j' && event.ctrlKey) || event.key == "Escape"){
+		event.preventDefault();
 	}
 	console.log(tiling_manager)
 });
