@@ -442,89 +442,55 @@ class TilingManager {
 		}
 	}
 	switchDown(){
-		let div_style = getComputedStyle(this.div);
-		let height = parseFloat(div_style.height);
-
-		let {x: bottom_middle_x, y: bottom} = this.active_window.getBottomMiddleCoordinates();
-
-		// 0.2 ∵ accumulation of floating point errors
-		if (areClose(bottom, height, 0.2)){
-			bottom = 0;
-		}
-
-		for (var current_window of this.windows){
-			let {x: top_left_x, y: top} = current_window.getTopLeftCoordinates()
-			let {x: top_right_x} = current_window.getTopRightCoordinates()
-			let top_segment = new Segment(top_left_x, top_right_x);
-			if (areClose(top, bottom, 0.2)){
-				if (top_segment.doesContain(bottom_middle_x)){
-					this.setActiveWindow(current_window);
-					break;
-				}
-			}
-		}
+		this.switchInDirection(0, 1);
 	}
 	switchUp(){
-		let div_style = getComputedStyle(this.div);
-		let height = parseFloat(div_style.height);
-
-		let {x: top_middle_x, y: top} = this.active_window.getTopMiddleCoordinates();
-
-		if (top == 0){
-			top = height;
-		}
-		
-		for (var current_window of this.windows){
-			let {x: bottom_left_x, y: bottom} = current_window.getBottomLeftCoordinates();
-			let {x: bottom_right_x} = current_window.getBottomRightCoordinates();
-			let bottom_segment = new Segment(bottom_left_x, bottom_right_x);
-			if (areClose(bottom, top, 0.2)){
-				if (bottom_segment.doesContain(top_middle_x)){
-					this.setActiveWindow(current_window);
-					break;
-				}
-			}
-		}
+		this.switchInDirection(0, -1);
 	}
 	switchLeft(){
-		let div_style = getComputedStyle(this.div);
-		let width = parseFloat(div_style.width);
-
-		let {x: left, y: middle_left_y} = this.active_window.getMiddleLeftCoordinates();
-		if (left === 0){
-			left = width;
-		}
-
-		for (var current_window of this.windows){
-			let {x: right, y: top_right_y} = current_window.getTopRightCoordinates();
-			let {y: bottom_right_y} = current_window.getBottomRightCoordinates();
-			let right_segment = new Segment(top_right_y, bottom_right_y);
-			if (areClose(right, left, 0.2)){
-				if (right_segment.doesContain(middle_left_y)){
-					this.setActiveWindow(current_window);
-					break;
-				}
-			}
-		}
+		this.switchInDirection(-1, 0);
 	}
 	switchRight(){
+		this.switchInDirection(1, 0);
+	}
+	switchInDirection(x, y){
 		let div_style = getComputedStyle(this.div);
-		let width = parseFloat(div_style.width);
-
-		let {x: right, y: middle_right_y} = this.active_window.getMiddleRightCoordinates();
-		if (areClose(right, width, 0.2)){
-			right = 0;
-		}
+		let div_width = parseFloat(div_style.width);
+		let div_height = parseFloat(div_style.height);
 		
+		const moving_direction = new Point(x, y);
+		let [width, height, left, top] = this.active_window.getDimensions();
+		const offset = new Point(left + width / 2, top + height / 2);
+		const point = offset.add(moving_direction.multiply(new Point(width / 2, height / 2)));
+		
+		if (areClose(point.x, div_width, 0.2)){
+			point.x = 0;
+		}
+		else if (areClose(point.y, div_height, 0.2)){
+			point.y = 0;
+		}
+		else if (point.x == 0){
+			point.x = div_width;
+		}
+		else if (point.y == 0){
+			point.y = div_height;
+		}
+		let padding = 0.2;
 		for (var current_window of this.windows){
-			let {x: left, y: top_left_y} = current_window.getTopLeftCoordinates();
-			let {y: bottom_left_y} = current_window.getBottomLeftCoordinates();
-			let left_segment = new Segment(top_left_y, bottom_left_y);
-			if (areClose(right, left, 0.2)){
-				if (left_segment.doesContain(middle_right_y)){
-					this.setActiveWindow(current_window);
-					break;
-				}
+			if (current_window == this.active_window){
+				continue;
+			}
+			[width, height, left, top] = current_window.getDimensions();
+			// padding (for floating point errors)
+			width += padding * 2;
+			height += padding * 2;
+			left -= padding;
+			top -= padding;
+			if ((point.y >= top && point.y <= top + height) &&
+				(point.x >= left && point.x <= left + width)
+			){
+				this.setActiveWindow(current_window);
+				break;
 			}
 		}
 	}

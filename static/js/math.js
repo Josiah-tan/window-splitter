@@ -9,6 +9,12 @@ export class Point {
 	subtract(point){
 		return new Point(this.x - point.x, this.y - point.y);
 	}
+	multiply(point){
+		return new Point(this.x * point.x, this.y * point.y);
+	}
+	add(point){
+		return new Point(this.x + point.x, this.y + point.y);
+	}
     toString() {
         return `Point(${this.x}, ${this.y})`;
     }
