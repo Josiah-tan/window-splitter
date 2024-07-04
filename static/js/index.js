@@ -56,7 +56,7 @@ class WindowLeaf extends _Window {
 		this.plot_ptr += increment;
 		var lookup = this.getCurrentPlot();
 		var plot_json = plots_json[lookup];
-		Plotly.newPlot(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+		Plotly.react(this.div, plot_json.data, plot_json.layout, {'responsive': true});
 	}
 	addNewPlot(lookup){
 		this.plot_json_ptrs.push(lookup);
@@ -65,7 +65,7 @@ class WindowLeaf extends _Window {
 		this.plot_ptr = -1;
 		var lookup = this.getCurrentPlot();
 		var plot_json = plots_json[lookup];
-		Plotly.newPlot(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+		Plotly.react(this.div, plot_json.data, plot_json.layout, {'responsive': true});
 	}
 	getCurrentPlot(){
 		if (this.plot_json_ptrs.length == 0){
