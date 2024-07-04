@@ -11,7 +11,10 @@ y_data = [10, 11, 12, 13, 14]
 trace = go.Scatter(x=x_data, y=y_data, mode='markers+lines', name='Sample Data')
 
 # Create layout
-layout = go.Layout(title='1Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
+if "counter" not in locals():
+    locals()["counter"] = 0
+locals()["counter"] += 1
+layout = go.Layout(title=f'sample plot {locals()["counter"]}', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
 
 # Create figure
 fig = go.Figure(data=[trace], layout=layout)

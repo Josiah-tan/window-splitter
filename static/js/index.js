@@ -52,20 +52,32 @@ class WindowLeaf extends _Window {
 		this._relative_x = 1;
 		this._relative_y = 1;
 	}
-	showNextPlot(plots_json, increment){
-		this.plot_ptr += increment;
+	duplicate(state = "active", plots_json, parent = null){
+		const window_leaf = new WindowLeaf(state, parent)
+		for (var plot_json_ptr of this.plot_json_ptrs){
+			window_leaf.plot_json_ptrs.push(plot_json_ptr)
+		}
+		window_leaf.plot_ptr = this.plot_ptr
+		window_leaf.showCurrentPlot(plots_json)
+		return window_leaf
+	}
+	showCurrentPlot(plots_json) {
 		var lookup = this.getCurrentPlot();
 		var plot_json = plots_json[lookup];
-		Plotly.react(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+		if (plot_json != undefined){
+			Plotly.react(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+		}
+	}
+	showNextPlot(plots_json, increment){
+		this.plot_ptr += increment;
+		this.showCurrentPlot(plots_json);
 	}
 	addNewPlot(lookup){
 		this.plot_json_ptrs.push(lookup);
 	}
 	showLatestPlot(plots_json){
 		this.plot_ptr = -1;
-		var lookup = this.getCurrentPlot();
-		var plot_json = plots_json[lookup];
-		Plotly.react(this.div, plot_json.data, plot_json.layout, {'responsive': true});
+		this.showCurrentPlot(plots_json);
 	}
 	getCurrentPlot(){
 		if (this.plot_json_ptrs.length == 0){
@@ -200,6 +212,13 @@ class TilingManager {
 			return null;
 		} else {
 			return new WindowLeaf(state);
+		}
+	}
+	_createNewWindowDuplicate(state, original){
+		if (this._number_windows == this.max_number_windows){
+			return null;
+		} else {
+			return original.duplicate(state, this.plots_json)
 		}
 	}
 	_handleDragDrop(x, y){
@@ -337,7 +356,7 @@ class TilingManager {
 	verticalSplitActive(){
 		if (this.zoomed_in) return;
 		let west = this.active_window;
-		let east = this._createNewWindow('inactive');
+		let east = this._createNewWindowDuplicate('inactive', this.active_window);
 		if (east == null){
 			alert(`max windows (${this.max_number_windows}) reached, cannot vertical split)`)
 			return;
@@ -359,7 +378,7 @@ class TilingManager {
 	horizontalSplitActive(){
 		if (this.zoomed_in) return;
 		let north = this.active_window;
-		let south = this._createNewWindow('inactive');
+		let south = this._createNewWindowDuplicate('inactive', this.active_window);
 		if (south == null){
 			alert(`max windows (${this.max_number_windows}) reached, cannot horizontal split)`)
 			return;
